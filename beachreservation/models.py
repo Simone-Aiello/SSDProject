@@ -1,7 +1,5 @@
-import datetime
 import decimal
 
-from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -38,7 +36,10 @@ class UmbrellaReservation(models.Model):
         reservations = UmbrellaReservation.objects.all().filter(reserved_umbrella_id=self.reserved_umbrella_id)
         for res in reservations:
             if (res.reservation_start_date <= self.reservation_end_date) and (res.reservation_end_date >= self.reservation_start_date) and (res.id != self.id):
-                raise ValidationError(f"Already present a reservation for start:{self.reservation_start_date} end:{self.reservation_end_date}")
+                raise ValidationError({
+                    'reservation_end_date': "We are sorry, this umbrella is already occupied for the selected period",
+                    'reservation_start_date': "We are sorry, this umbrella is already occupied for the selected period"
+                })
 
     # serializers does not call this method, call it directly
     def clean(self):

@@ -32,7 +32,7 @@ def test_cant_book_for_overlapped_reservations(db):
                     reservation_end_date=datetime.date(2022, 12, 26)),
     ]
     for invalid_data in invalid_reservations:
-        with pytest.raises(ValidationError) as e:
+        with pytest.raises(ValidationError):
             invalid_data.full_clean()
 
 
@@ -72,11 +72,11 @@ def test_invalid_reservation_values(db):
                     reserved_umbrella_id=2,
                     reservation_start_date=today_date, reservation_end_date=today_date),
         # Start date can't be in the past
-        #mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
+        # mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
         #            reserved_umbrella_id=3,
         #            reservation_start_date=today_date - relativedelta(days=1), reservation_end_date=today_date),
         # End date can't be in the past
-        #mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
+        # mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
         #            reserved_umbrella_id=4,
         #            reservation_start_date=today_date, reservation_end_date=today_date - relativedelta(days=1)),
 
@@ -86,14 +86,14 @@ def test_invalid_reservation_values(db):
                     reservation_start_date=today_date + relativedelta(days=1), reservation_end_date=today_date),
 
         # Can't book after a certain month span from now
-        #mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
+        # mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
         #            reserved_umbrella_id=6,
         #            reservation_start_date=today_date + relativedelta(months=utils.MAX_FUTURE_START_DATE_IN_MONTH,
         #                                                              days=1),
         #            reservation_end_date=today_date + relativedelta(months=utils.MAX_FUTURE_START_DATE_IN_MONTH,
         #                                                            days=2)),
 
-        #mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
+        # mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
         #            reserved_umbrella_id=7,
         #            reservation_start_date=today_date + relativedelta(months=utils.MAX_FUTURE_START_DATE_IN_MONTH),
         #            reservation_end_date=today_date + relativedelta(months=utils.MAX_FUTURE_END_DATE_IN_MONTH,
@@ -109,6 +109,5 @@ def test_invalid_reservation_values(db):
                     reservation_start_date=today_date, reservation_end_date=today_date),
     ]
     for reservation in invalid_reservations:
-        with pytest.raises(ValidationError) as e:
+        with pytest.raises(ValidationError):
             reservation.full_clean()
-        # print(e.value.messages)

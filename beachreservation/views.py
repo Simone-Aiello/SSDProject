@@ -1,19 +1,27 @@
-from django.shortcuts import render
-from rest_framework import generics, permissions
+from rest_framework import permissions, status, mixins, viewsets
+from rest_framework.response import Response
 
 from beachreservation.models import UmbrellaReservation
 from beachreservation.serializers import RestrictedUmbrellaReservationSerializer
 
 
-# Create your views here.
-class UmbrellaReservationsList(generics.ListCreateAPIView):
+class CreateListRetrieveViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
+    pass
+
+
+class UmbrellaReservationsListCreateViewSet(CreateListRetrieveViewSet):
     queryset = UmbrellaReservation.objects.all()
     serializer_class = RestrictedUmbrellaReservationSerializer
-    # If I'm authenticated I can make POST request (only with my account), if not I can only see current reservations
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    # Calls the save method of serializer "imposing" the user who make the request to be the customer
-    # NB this is done after the validation, this means that i cannot exclude customer from the serializer
-    # Is this really the correct way?
+    def create(self, request, *args, **kwargs):
+        if request.data['customer'] != f"{request.user.id}":
+            return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     def perform_create(self, serializer):
         serializer.save(customer=self.request.user)

@@ -1,7 +1,9 @@
 from django.urls import path
+from rest_framework.routers import SimpleRouter
 
-from beachreservation.views import UmbrellaReservationsList
+from beachreservation.views import UmbrellaReservationsListCreateViewSet
 
-urlpatterns = [
-    path('', UmbrellaReservationsList.as_view())
-]
+router = SimpleRouter()
+
+router.register('', UmbrellaReservationsListCreateViewSet, basename='reservations')
+urlpatterns = router.urls

@@ -2,10 +2,14 @@ from rest_framework import permissions, status, mixins, viewsets
 from rest_framework.response import Response
 
 from beachreservation.models import UmbrellaReservation
-from beachreservation.serializers import RestrictedUmbrellaReservationSerializer
+from beachreservation.serializers import RestrictedUmbrellaReservationSerializer, FullUmbrellaReservationSerializer
 
 
 class CreateListRetrieveViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
+    pass
+
+
+class RetrieveDeleteViewSet(mixins.RetrieveModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
     pass
 
 
@@ -16,7 +20,8 @@ class UmbrellaReservationsListCreateViewSet(CreateListRetrieveViewSet):
 
     def create(self, request, *args, **kwargs):
         if request.data['customer'] != f"{request.user.id}":
-            return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"detail": "You do not have permission to perform this action."},
+                            status=status.HTTP_403_FORBIDDEN)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -25,3 +30,11 @@ class UmbrellaReservationsListCreateViewSet(CreateListRetrieveViewSet):
 
     def perform_create(self, serializer):
         serializer.save(customer=self.request.user)
+
+
+class UmbrellaReservationsRetrieveDeleteViewSet(RetrieveDeleteViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = FullUmbrellaReservationSerializer
+
+    def get_queryset(self):
+        return UmbrellaReservation.objects.filter(customer=self.request.user)

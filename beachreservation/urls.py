@@ -6,5 +6,5 @@ from beachreservation.views import UmbrellaReservationsListCreateViewSet, Umbrel
 router = SimpleRouter()
 
 router.register('', UmbrellaReservationsListCreateViewSet, basename='reservations')
-router.register('reservation-details', UmbrellaReservationsRetrieveDeleteViewSet, basename='single-reservation')
+router.register('reservation-details', UmbrellaReservationsRetrieveDeleteViewSet, basename='user-reservations')
 urlpatterns = router.urls

@@ -9,10 +9,11 @@ class CreateListRetrieveViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, 
     pass
 
 
-class RetrieveDeleteViewSet(mixins.RetrieveModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+class ListRetrieveDeleteViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
     pass
 
 
+# TODO: Maybe we can remove the List View (?)
 class UmbrellaReservationsListCreateViewSet(CreateListRetrieveViewSet):
     queryset = UmbrellaReservation.objects.all()
     serializer_class = RestrictedUmbrellaReservationSerializer
@@ -32,7 +33,7 @@ class UmbrellaReservationsListCreateViewSet(CreateListRetrieveViewSet):
         serializer.save(customer=self.request.user)
 
 
-class UmbrellaReservationsRetrieveDeleteViewSet(RetrieveDeleteViewSet):
+class UmbrellaReservationsRetrieveDeleteViewSet(ListRetrieveDeleteViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = FullUmbrellaReservationSerializer
 

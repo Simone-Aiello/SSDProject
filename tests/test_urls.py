@@ -63,7 +63,7 @@ class TestUmbrellaReservationsListCreateDestroyViewSet:
         delete_request_response = client.delete(path)
         assert delete_request_response.status_code == HTTP_403_FORBIDDEN
 
-    def test_logged_user_can_make_get_requests_and_receive_is_own_reservations(self, db):
+    def test_logged_user_can_make_get_requests_and_receive_own_reservations(self, db):
         path = reverse('reservations-list')
         user = mixer.blend(get_user_model())
         mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MIN_SEAT_UMBRELLA,
@@ -95,23 +95,11 @@ class TestUmbrellaReservationsListCreateDestroyViewSet:
         path = reverse('reservations-list')
         user = mixer.blend(get_user_model())
         client = get_client(user)
-        reservation = {'customer': user.id, 'number_of_seats': 2, 'reservation_start_date': datetime.date.today(),
+        reservation = {'number_of_seats': 2, 'reservation_start_date': datetime.date.today(),
                        'reservation_end_date': datetime.date.today(), 'reserved_umbrella_id': 10}
         response = client.post(path, reservation)
 
         assert response.status_code == HTTP_201_CREATED
-        assert parse(response)['customer'] == user.id
-
-    def test_customer_user_cant_make_posts_request_for_other_users(self, db):
-        path = reverse('reservations-list')
-        victim_user = mixer.blend(get_user_model())
-        logged_user = mixer.blend(get_user_model())
-        client = get_client(logged_user)
-        reservation = {'customer': victim_user.id, 'number_of_seats': 3,
-                       'reservation_start_date': datetime.date.today(), 'reservation_end_date': datetime.date.today(),
-                       'reserved_umbrella_id': 10}
-        response = client.post(path, reservation)
-        assert response.status_code == HTTP_403_FORBIDDEN
 
     def test_logged_user_can_delete_owned_reservations(self, db):
         user = mixer.blend(get_user_model())
@@ -129,7 +117,6 @@ class TestUmbrellaReservationsListCreateDestroyViewSet:
         user = mixer.blend(get_user_model())
         client = get_client(user)
         response = client.delete(path)
-        print(response.status_code)
         assert response.status_code == HTTP_404_NOT_FOUND
 
     def test_beach_manager_can_make_get_requests_and_receive_all_reservations(self, reservations):

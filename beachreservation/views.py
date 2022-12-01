@@ -23,10 +23,14 @@ class UmbrellaReservationsListCreateDestroyViewSet(CreateListDestroyViewSet):
         if self.request.user.groups.filter(name='beach-managers').exists():
             return UmbrellaReservation.objects.all()
 
-        # If we are logged in but not as a beach manager then we receive only our requests
+        # If we are logged in but not as a beach manager then we receive only our reservations
         else:
             return UmbrellaReservation.objects.all().filter(customer=self.request.user)
 
+    def perform_create(self, serializer):
+        serializer.save(customer=self.request.user)
+
+    """
     def create(self, request, *args, **kwargs):
         if request.data['customer'] != f"{request.user.id}":
             return Response({"detail": "You do not have permission to perform this action."},
@@ -36,3 +40,4 @@ class UmbrellaReservationsListCreateDestroyViewSet(CreateListDestroyViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    """

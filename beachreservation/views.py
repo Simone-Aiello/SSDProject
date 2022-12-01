@@ -1,26 +1,31 @@
 from rest_framework import permissions, status, mixins, viewsets
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from beachreservation.models import UmbrellaReservation
-from beachreservation.permissions import IsBeachManagerOrPOSTOnly
 from beachreservation.serializers import RestrictedUmbrellaReservationSerializer, FullUmbrellaReservationSerializer
 
 
-class CreateListRetrieveViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
+class CreateListDestroyViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
     pass
 
 
-class ListRetrieveDeleteViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, mixins.DestroyModelMixin,
-                                viewsets.GenericViewSet):
-    pass
+class UmbrellaReservationsListCreateDestroyViewSet(CreateListDestroyViewSet):
+    permission_classes = [permissions.IsAuthenticated]
 
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return RestrictedUmbrellaReservationSerializer
+        else:
+            return FullUmbrellaReservationSerializer
 
-class UmbrellaReservationsListCreateViewSet(CreateListRetrieveViewSet):
-    queryset = UmbrellaReservation.objects.all()
-    serializer_class = RestrictedUmbrellaReservationSerializer
-    # If I'm authenticated I can make POST request (create new reservations), GET method can be only performed by beach managers
-    permission_classes = [IsBeachManagerOrPOSTOnly, permissions.IsAuthenticated]
+    def get_queryset(self):
+        # If we are querying this endpoint as a beach manager we retrieve all the reservations
+        if self.request.user.groups.filter(name='beach-managers').exists():
+            return UmbrellaReservation.objects.all()
+
+        # If we are logged in but not as a beach manager then we receive only our requests
+        else:
+            return UmbrellaReservation.objects.all().filter(customer=self.request.user)
 
     def create(self, request, *args, **kwargs):
         if request.data['customer'] != f"{request.user.id}":
@@ -31,18 +36,3 @@ class UmbrellaReservationsListCreateViewSet(CreateListRetrieveViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-
-class UmbrellaReservationsListRetrieveDeleteViewSet(ListRetrieveDeleteViewSet):
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = FullUmbrellaReservationSerializer
-
-    def get_queryset(self):
-        return UmbrellaReservation.objects.filter(customer=self.request.user)
-
-
-class CheckAvailableUmbrellaOnDateRangeAPIView(APIView):
-    permission_classes = [permissions.IsAdminUser]
-
-    def get(self, request):
-        pass

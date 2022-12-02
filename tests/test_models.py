@@ -62,6 +62,7 @@ def test_price_calculation_in_umbrella_reservation(db):
 def test_invalid_reservation_values(db):
     today_date = datetime.date.today()
     invalid_reservations = [
+
         # Number of seats below minimum
 
         mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MIN_SEAT_UMBRELLA - 1,
@@ -71,33 +72,11 @@ def test_invalid_reservation_values(db):
         mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA + 1,
                     reserved_umbrella_id=2,
                     reservation_start_date=today_date, reservation_end_date=today_date),
-        # Start date can't be in the past
-        # mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
-        #            reserved_umbrella_id=3,
-        #            reservation_start_date=today_date - relativedelta(days=1), reservation_end_date=today_date),
-        # End date can't be in the past
-        # mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
-        #            reserved_umbrella_id=4,
-        #            reservation_start_date=today_date, reservation_end_date=today_date - relativedelta(days=1)),
 
         # End date before start date
         mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
                     reserved_umbrella_id=5,
                     reservation_start_date=today_date + relativedelta(days=1), reservation_end_date=today_date),
-
-        # Can't book after a certain month span from now
-        # mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
-        #            reserved_umbrella_id=6,
-        #            reservation_start_date=today_date + relativedelta(months=utils.MAX_FUTURE_START_DATE_IN_MONTH,
-        #                                                              days=1),
-        #            reservation_end_date=today_date + relativedelta(months=utils.MAX_FUTURE_START_DATE_IN_MONTH,
-        #                                                            days=2)),
-
-        # mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
-        #            reserved_umbrella_id=7,
-        #            reservation_start_date=today_date + relativedelta(months=utils.MAX_FUTURE_START_DATE_IN_MONTH),
-        #            reservation_end_date=today_date + relativedelta(months=utils.MAX_FUTURE_END_DATE_IN_MONTH,
-        #                                                            days=1)),
 
         # Reserved umbrella id above the maximum
         mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
@@ -109,5 +88,41 @@ def test_invalid_reservation_values(db):
                     reservation_start_date=today_date, reservation_end_date=today_date),
     ]
     for reservation in invalid_reservations:
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError) as e:
             reservation.full_clean()
+
+
+def test_valid_model_values(db):
+    today_date = datetime.date.today()
+    valid_values = [
+        # Number of seats equals to the minimum
+        mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MIN_SEAT_UMBRELLA,
+                    reserved_umbrella_id=2, reservation_start_date=today_date, reservation_end_date=today_date),
+
+        # Number of seats equals to the maximum
+        mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
+                    reserved_umbrella_id=3, reservation_start_date=today_date, reservation_end_date=today_date),
+
+        # Reserved umbrella id equals to the minimum
+        mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
+                    reserved_umbrella_id=utils.MIN_UMBRELLA_ID, reservation_start_date=today_date,
+                    reservation_end_date=today_date),
+
+        # Reserved umbrella id equals to the maximum
+        mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
+                    reserved_umbrella_id=utils.MAX_UMBRELLA_ID, reservation_start_date=today_date,
+                    reservation_end_date=today_date),
+
+        # A < B with dates overlapping
+        mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
+                    reserved_umbrella_id=utils.MAX_UMBRELLA_ID, reservation_start_date=today_date - relativedelta(days=2),
+                    reservation_end_date=today_date - relativedelta(days=1)),
+
+        # A > B with dates overlapping
+        mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MAX_SEAT_UMBRELLA,
+                    reserved_umbrella_id=utils.MAX_UMBRELLA_ID,
+                    reservation_start_date=today_date + relativedelta(days=1),
+                    reservation_end_date=today_date + relativedelta(days=2)),
+    ]
+    for value in valid_values:
+        value.full_clean()

@@ -41,28 +41,36 @@ class UmbrellaReservationsListCreateDestroyViewSet(CreateListDestroyViewSet):
 class FreeUmbrellaInADateRange(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    def __validate_received_date_values(self, start_date_initial, end_date_initial):
+        if start_date_initial is None or end_date_initial is None:
+            raise ValueError("Start date and End date parameters are required")
+
+        start_date = datetime.datetime.strptime(start_date_initial, '%Y-%m-%d').date()
+        end_date = datetime.datetime.strptime(end_date_initial, '%Y-%m-%d').date()
+
+        if end_date < start_date:
+            raise ValueError("End date can't be after start date")
+
+        return start_date, end_date
+
+    def __query_for_umbrella_ids_with_overlapping_reservations(self, start_date, end_date):
+        criterion1 = Q(reservation_start_date__lte=end_date)
+        criterion2 = Q(reservation_end_date__gte=start_date)
+        res = UmbrellaReservation.objects.filter(criterion1 & criterion2).values_list(
+            'reserved_umbrella_id', flat=True)
+        return res
+
     def get(self, request):
         start_date_initial = request.GET.get('start_date', None)
         end_date_initial = request.GET.get('end_date', None)
-        if start_date_initial is None or end_date_initial is None:
-            return Response(data={"res": "Start date and End date parameters are required"},
-                            status=HTTP_400_BAD_REQUEST)
+
         try:
-            start_date = datetime.datetime.strptime(start_date_initial, '%Y-%m-%d').date()
-            end_date = datetime.datetime.strptime(end_date_initial, '%Y-%m-%d').date()
-        except ValueError:
-            return Response(data={"res": "Date format must be yyyy-mm-dd"}, status=HTTP_400_BAD_REQUEST)
+            start_date, end_date = self.__validate_received_date_values(start_date_initial, end_date_initial)
+        except ValueError as e:
+            return Response(data=e.args, status=HTTP_400_BAD_REQUEST)
 
-        if end_date < start_date:
-            return Response(data={"res": "End date can't be after start date"}, status=HTTP_400_BAD_REQUEST)
-
-        criterion1 = Q(reservation_start_date__lte=end_date)
-        criterion2 = Q(reservation_end_date__gte=start_date)
-
-        overlapping_reservations_umbrella_id = UmbrellaReservation.objects.filter(criterion1 & criterion2).values_list(
-            'reserved_umbrella_id', flat=True)
-
+        overlapping_reservations_umbrella_id = self.__query_for_umbrella_ids_with_overlapping_reservations(start_date,
+                                                                                                           end_date)
         free_umbrella_id = [i for i in range(utils.MIN_UMBRELLA_ID, utils.MAX_UMBRELLA_ID + 1) if
                             i not in overlapping_reservations_umbrella_id]
-
-        return Response(data={"res": free_umbrella_id}, status=HTTP_200_OK)
+        return Response(data=free_umbrella_id, status=HTTP_200_OK)

@@ -15,7 +15,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
@@ -26,7 +25,6 @@ SECRET_KEY = 'django-insecure-6yoe+q^w8r%#uxf02@4x0)ct^*770gsn_ex(ra=x#n#_l&!q-x
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -39,13 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
 
+    'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
     'allauth',
     'allauth.account',
     'dj_rest_auth',
     'dj_rest_auth.registration',
-    'corsheaders',
     'beachreservation.apps.BeachreservationConfig',
 ]
 REST_FRAMEWORK = {
@@ -68,11 +66,34 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-CORS_ALLOWED_ORIGIN = [
+"""
+CORS_ALLOWED_ORIGINS = [
+    # Dev server
     'http://localhost:8000',
+    # Frontend server
+    'http://localhost:5173',
 ]
+"""
+#CORS_ALLOWED_ORIGINS = [
+#    # Dev server
+#    'http://localhost:8000',
+#    # Frontend server
+#    'http://localhost:5173',
+#]
 
+# TODO is this ok????
+CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:5173',
+    #'http://127.0.0.1:5173',
+]
+CORS_ORIGIN_WHITELIST = [
+    #'http://127.0.0.1:5173',
+    # Dev server
+    'http://localhost:8000',
+    # Frontend server
+    'http://localhost:5173',
+]
 ROOT_URLCONF = 'BeachResortReservation.urls'
 
 TEMPLATES = [
@@ -94,7 +115,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'BeachResortReservation.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
@@ -104,7 +124,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -124,7 +143,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
@@ -135,7 +153,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/

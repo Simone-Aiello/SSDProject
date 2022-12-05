@@ -211,6 +211,6 @@ class TestFreeUmbrellaInADateRange:
         client = get_client(user)
         response = client.get(path)
         expected_free_umbrella_id = [i for i in range(utils.MIN_UMBRELLA_ID, utils.MAX_UMBRELLA_ID + 1) if i != 1 and i != 2]
-        received_umbrella_id = parse(response)['res']
+        received_umbrella_id = parse(response)
         assert response.status_code == HTTP_200_OK
         assert expected_free_umbrella_id == received_umbrella_id

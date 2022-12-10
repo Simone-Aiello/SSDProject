@@ -1,7 +1,7 @@
 import datetime
 
 from django.db.models import Q
-from rest_framework import permissions, status, mixins, viewsets
+from rest_framework import permissions, mixins, viewsets
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
@@ -41,7 +41,8 @@ class UmbrellaReservationsListCreateDestroyViewSet(CreateListDestroyViewSet):
 class FreeUmbrellaInADateRange(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def __validate_received_date_values(self, start_date_initial, end_date_initial):
+    @staticmethod
+    def __validate_received_date_values(start_date_initial, end_date_initial):
         if start_date_initial is None or end_date_initial is None:
             raise ValueError("Start date and End date parameters are required")
 
@@ -53,7 +54,8 @@ class FreeUmbrellaInADateRange(APIView):
 
         return start_date, end_date
 
-    def __query_for_umbrella_ids_with_overlapping_reservations(self, start_date, end_date):
+    @staticmethod
+    def __query_for_umbrella_ids_with_overlapping_reservations(start_date, end_date):
         criterion1 = Q(reservation_start_date__lte=end_date)
         criterion2 = Q(reservation_end_date__gte=start_date)
         res = UmbrellaReservation.objects.filter(criterion1 & criterion2).values_list(

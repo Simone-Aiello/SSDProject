@@ -33,11 +33,13 @@ class RestrictedUmbrellaReservationSerializer(serializers.ModelSerializer):
             'reserved_umbrella_id')
         model = UmbrellaReservation
 
-    def validate_reservation_start_date(self, date):
+    @staticmethod
+    def validate_reservation_start_date(date):
         check_if_data_is_after_or_equal_today(date)
         return date
 
-    def validate_reservation_end_date(self, date):
+    @staticmethod
+    def validate_reservation_end_date(date):
         check_if_data_is_after_or_equal_today(date)
         return date
 

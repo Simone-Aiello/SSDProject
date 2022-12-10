@@ -35,13 +35,13 @@ class UmbrellaReservation(models.Model):
     def validate_overlapping_reservations(self):
         reservations = UmbrellaReservation.objects.all().filter(reserved_umbrella_id=self.reserved_umbrella_id)
         for res in reservations:
-            if (res.reservation_start_date <= self.reservation_end_date) and (res.reservation_end_date >= self.reservation_start_date) and (res.id != self.id):
+            if (res.reservation_start_date <= self.reservation_end_date) and (
+                    res.reservation_end_date >= self.reservation_start_date) and (res.id != self.id):
                 raise ValidationError({
                     'reservation_end_date': "We are sorry, this umbrella is already occupied for the selected period",
                     'reservation_start_date': "We are sorry, this umbrella is already occupied for the selected period"
                 })
 
-    # serializers does not call this method, call it directly
     def clean(self):
         super(UmbrellaReservation, self).clean()
         self.validate_end_date_after_start_date()

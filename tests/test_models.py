@@ -64,7 +64,6 @@ def test_invalid_reservation_values(db):
     invalid_reservations = [
 
         # Number of seats below minimum
-
         mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MIN_SEAT_UMBRELLA - 1,
                     reserved_umbrella_id=1,
                     reservation_start_date=today_date, reservation_end_date=today_date),
@@ -88,7 +87,7 @@ def test_invalid_reservation_values(db):
                     reservation_start_date=today_date, reservation_end_date=today_date),
     ]
     for reservation in invalid_reservations:
-        with pytest.raises(ValidationError) as e:
+        with pytest.raises(ValidationError):
             reservation.full_clean()
 
 

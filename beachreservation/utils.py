@@ -1,5 +1,3 @@
-import datetime
-
 MIN_SEAT_UMBRELLA = 2
 MAX_SEAT_UMBRELLA = 4
 MAX_UMBRELLA_ID = 50

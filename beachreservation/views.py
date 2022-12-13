@@ -50,7 +50,7 @@ class FreeUmbrellaInADateRange(APIView):
         end_date = datetime.datetime.strptime(end_date_initial, '%Y-%m-%d').date()
 
         if end_date < start_date:
-            raise ValueError("End date can't be after start date")
+            raise ValueError("End date can't be before start date")
 
         return start_date, end_date
 

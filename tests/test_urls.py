@@ -200,17 +200,17 @@ class TestFreeUmbrellaInADateRange:
     def test_logged_user_receive_free_umbrella_on_a_given_date_range(self, reservations):
         mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MIN_SEAT_UMBRELLA,
                     reserved_umbrella_id=1,
-                    reservation_start_date=datetime.date(2022, 12, 20),
+                    reservation_start_date=datetime.date(2022, 12, 30),
                     reservation_end_date=datetime.date(2022, 12, 31)),
         mixer.blend('beachreservation.UmbrellaReservation', number_of_seats=utils.MIN_SEAT_UMBRELLA,
-                    reserved_umbrella_id=2,
-                    reservation_start_date=datetime.date(2022, 12, 20),
+                    reserved_umbrella_id=7,
+                    reservation_start_date=datetime.date(2022, 12, 30),
                     reservation_end_date=datetime.date(2022, 12, 31))
-        path = f"/api/v1/beachreservation/freeumbrella?start_date=2022-12-20&end_date=2022-12-21"
+        path = f"/api/v1/beachreservation/freeumbrella?start_date=2022-12-30&end_date=2022-12-31"
         user = mixer.blend(get_user_model())
         client = get_client(user)
         response = client.get(path)
-        expected_free_umbrella_id = [i for i in range(utils.MIN_UMBRELLA_ID, utils.MAX_UMBRELLA_ID + 1) if i != 1 and i != 2]
+        expected_free_umbrella_id = [i for i in range(utils.MIN_UMBRELLA_ID, utils.MAX_UMBRELLA_ID + 1) if i != 1 and i != 7]
         received_umbrella_id = parse(response)
         assert response.status_code == HTTP_200_OK
         assert expected_free_umbrella_id == received_umbrella_id

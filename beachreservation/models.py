@@ -14,8 +14,6 @@ class UmbrellaReservation(models.Model):
     number_of_seats = models.PositiveIntegerField(
         validators=[MinValueValidator(utils.MIN_SEAT_UMBRELLA), MaxValueValidator(utils.MAX_SEAT_UMBRELLA)])
 
-    # Upper and lower bound are provided by datetime itself
-    # https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwik-c_l-s77AhUq_7sIHaZMB4QQFnoECBcQAw&url=https%3A%2F%2Fdocs.python.org%2F3%2Flibrary%2Fdatetime.html&usg=AOvVaw2B4kHEI-fKck2g0fHzHQ5q
     reservation_start_date = models.DateField()
     reservation_end_date = models.DateField()
 
